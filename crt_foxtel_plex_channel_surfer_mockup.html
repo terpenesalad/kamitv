@@ -1,0 +1,202 @@
+<style>
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.tvstage{font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;align-items:center;gap:14px;padding:1rem 0}
+.tvset{width:100%;max-width:600px;background:#15151a;border:1px solid #2c2c34;border-radius:22px;padding:18px 18px 12px;box-shadow:inset 0 2px 6px rgba(255,255,255,.04)}
+.screen{position:relative;width:100%;aspect-ratio:4/3;border-radius:26px/34px;overflow:hidden;background:#000;box-shadow:inset 0 0 60px rgba(0,0,0,.9)}
+.scr-content{position:absolute;inset:0;transition:filter .15s}
+.ovl{position:absolute;inset:0;pointer-events:none}
+.scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.55) 0,rgba(0,0,0,.55) 1px,transparent 1px,transparent 3px)}
+.vignette{background:radial-gradient(120% 120% at 50% 50%,transparent 55%,rgba(0,0,0,.85) 100%);box-shadow:inset 0 0 30px 6px rgba(0,0,0,.7)}
+.glare{background:radial-gradient(50% 40% at 22% 14%,rgba(255,255,255,.10),transparent 60%)}
+.hum{height:14%;background:linear-gradient(rgba(255,255,255,.045),transparent);animation:roll 7s linear infinite}
+.flick .scr-content{animation:flick .12s steps(2) infinite}
+.crt-off .ovl,.crt-off .hum{display:none}
+@keyframes roll{0%{transform:translateY(-20%)}100%{transform:translateY(820%)}}
+@keyframes flick{0%{filter:brightness(1)}50%{filter:brightness(.965)}100%{filter:brightness(1)}}
+.chflash{position:absolute;top:14px;left:18px;font-weight:bold;font-size:42px;color:#fff;text-shadow:2px 0 #f33,-2px 0 #3cf,0 0 12px rgba(255,255,255,.5);opacity:0;transition:opacity .25s}
+.statc{position:absolute;inset:0;opacity:0;z-index:9}
+.remote{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;width:100%;max-width:600px}
+.rbtn{font-family:inherit;font-size:12px;font-weight:bold;letter-spacing:.04em;color:#cfd2da;background:#23232b;border:1px solid #3a3a44;border-radius:9px;padding:8px 12px;cursor:pointer;min-width:40px}
+.rbtn:hover{background:#2e2e38;color:#fff}
+.rbtn:active{transform:scale(.96)}
+.rbtn.on{background:#0c3f8f;border-color:#1f63c9;color:#fff}
+.dpad{display:grid;grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,30px);gap:3px}
+.dpad .rbtn{min-width:0;padding:0}
+.settings{width:100%;max-width:600px;background:#1b1b22;border:1px solid #2c2c34;border-radius:14px;padding:14px 16px;color:#c7cad2;font-size:13px}
+.srow{display:flex;align-items:center;gap:10px;margin:9px 0}
+.srow label{flex:0 0 118px;color:#9a9ea8;font-size:12px;letter-spacing:.03em}
+.srow input[type=range]{flex:1}
+.srow .val{flex:0 0 34px;text-align:right;font-variant-numeric:tabular-nums;color:#fff}
+.tog{position:relative;width:42px;height:22px;border-radius:11px;background:#34343e;cursor:pointer;border:1px solid #44444f;flex:0 0 auto}
+.tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#8b8f99;transition:.18s}
+.tog.on{background:#0c3f8f;border-color:#1f63c9}
+.tog.on::after{left:22px;background:#fff}
+.seltint{background:#23232b;color:#fff;border:1px solid #3a3a44;border-radius:8px;padding:6px 8px;font-family:inherit;font-size:12px}
+</style>
+
+<div class="tvstage">
+  <h2 class="sr-only">A mockup of a 2000s-style cable TV guide and channel surfer for a Plex library, rendered on an emulated CRT television with adjustable retro display effects.</h2>
+  <div class="tvset">
+    <div class="screen crt-off" id="screen" style="--scan:.5;--curve:.7">
+      <div class="scr-content" id="content"></div>
+      <canvas class="ovl statc" id="statc" width="160" height="120"></canvas>
+      <div class="ovl scanlines" id="ovlScan"></div>
+      <div class="ovl vignette" id="ovlVig"></div>
+      <div class="ovl glare"></div>
+      <div class="ovl"><div class="hum"></div></div>
+      <div class="chflash" id="chflash"></div>
+    </div>
+  </div>
+
+  <div class="remote">
+    <button class="rbtn" id="btnGuide"><i class="ti ti-layout-grid" aria-hidden="true"></i> guide</button>
+    <div class="dpad">
+      <span></span><button class="rbtn" data-d="up" aria-label="up">▲</button><span></span>
+      <button class="rbtn" data-d="left" aria-label="left">◄</button>
+      <button class="rbtn" id="btnOk">ok</button>
+      <button class="rbtn" data-d="right" aria-label="right">►</button>
+      <span></span><button class="rbtn" data-d="down" aria-label="down">▼</button><span></span>
+    </div>
+    <button class="rbtn" id="chUp">ch ▲</button>
+    <button class="rbtn" id="chDn">ch ▼</button>
+    <button class="rbtn" id="btnSet"><i class="ti ti-settings" aria-hidden="true"></i></button>
+  </div>
+
+  <div class="settings" id="settings" style="display:none">
+    <div class="srow"><label>CRT effect</label><div class="tog on" data-t="crt"></div></div>
+    <div class="srow"><label>Scanlines</label><input type="range" id="sScan" min="0" max="100" step="1" value="50"><span class="val" id="vScan">50</span></div>
+    <div class="srow"><label>Screen curve</label><input type="range" id="sCurve" min="0" max="100" step="1" value="70"><span class="val" id="vCurve">70</span></div>
+    <div class="srow"><label>Flicker</label><div class="tog on" data-t="flick"></div></div>
+    <div class="srow"><label>Channel static</label><div class="tog on" data-t="static"></div></div>
+    <div class="srow"><label>Phosphor tint</label>
+      <select class="seltint" id="tint">
+        <option value="none">colour</option>
+        <option value="warm">warm</option>
+        <option value="cool">cool</option>
+        <option value="bw">black &amp; white</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+var channels=[
+ {n:100,name:"BIGSCREEN",cat:"MOVIES",c:"#7a1f3d",p:[{t:"Asteroid Run",s:"A salvage crew gambles everything on one last haul through the belt."},{t:"The Long Drop",s:"A heist thriller where absolutely nothing goes to plan."},{t:"Midnight Diner",s:"Strangers trade secrets over very late coffee."}]},
+ {n:101,name:"PRIME DRAMA",cat:"DRAMA",c:"#143a6b",p:[{t:"Harbour Lights",s:"A coastal town keeps its quietest people the busiest."},{t:"The Ward",s:"Night shift at a hospital that never really sleeps."},{t:"Coastal",s:"Two families, one stretch of beach, decades of grudges."}]},
+ {n:102,name:"HA!",cat:"COMEDY",c:"#a85718",p:[{t:"Sharehouse",s:"Four flatmates, one fridge, infinite passive aggression."},{t:"Office Hours",s:"The meeting that could have been an email, dramatised."},{t:"Stand-Up Lounge",s:"Open mic night where the hecklers are the talent."}]},
+ {n:103,name:"WARP",cat:"SCI-FI",c:"#2a1b6b",p:[{t:"Nebula Patrol",s:"A patrol ship answers a distress call that shouldn't exist."},{t:"Far Signal",s:"First contact, with the worst possible timing."},{t:"Red Planet Diaries",s:"Colonists discover the rent on Mars is murder."}]},
+ {n:104,name:"SPROUT",cat:"KIDS",c:"#1b6b3a",p:[{t:"Captain Cassowary",s:"A flightless hero saves the rainforest one stomp at a time."},{t:"Bouncy Town",s:"Everything is springy and the lessons are gentle."},{t:"Doodle Club",s:"Drawing, sharing, and absolutely no colouring outside the lines."}]},
+ {n:105,name:"TRUE",cat:"DOCOS",c:"#0f5c5c",p:[{t:"Deep Reef",s:"What lives below the divers, and why it glows."},{t:"Built Big",s:"Cranes, concrete, and a deadline nobody believes in."},{t:"Wild Outback",s:"A waterhole at dawn, and everyone shows up thirsty."}]},
+ {n:106,name:"RERUN",cat:"CLASSIC",c:"#5c4a0f",p:[{t:"Squad Car 7",s:"Two cops, one beat-up sedan, endless paperwork."},{t:"The Practice Room",s:"A garage band that is one chord away from greatness."},{t:"Diner Days",s:"Regulars, refills, and a jukebox stuck on one song."}]},
+ {n:107,name:"OWL",cat:"LATE",c:"#1a1a2e",p:[{t:"Insomnia Cinema",s:"The film that's always on when you can't sleep."},{t:"As Seen On TV",s:"You will not believe what this gadget claims to do."},{t:"Test Pattern",s:"Colour bars. A faint hum. Strangely soothing."}]}
+];
+var screen=document.getElementById("screen"),content=document.getElementById("content"),chflash=document.getElementById("chflash"),settings=document.getElementById("settings"),statc=document.getElementById("statc");
+var mode="watch",idx=3,sel={r:0,c:0},set={crt:true,flick:true,static:true,scan:.5,curve:.7,tint:"none"};
+
+function base(){var d=new Date();d.setSeconds(0,0);d.setMinutes(d.getMinutes()<30?0:30);return d;}
+function fmt(d){var h=d.getHours(),m=d.getMinutes(),ap=h<12?"AM":"PM";h=h%12||12;return h+":"+(m<10?"0"+m:m)+" "+ap;}
+function nowStr(){var d=new Date(),h=d.getHours(),m=d.getMinutes(),ap=h<12?"AM":"PM";h=h%12||12;return h+":"+(m<10?"0"+m:m)+" "+ap;}
+function cols(){var b=base();return[0,1,2].map(function(i){return new Date(b.getTime()+i*1800000);});}
+
+function watchView(){
+ var ch=channels[idx],now=ch.p[0];
+ var pct=Math.round(new Date().getMinutes()%30/30*100);
+ return '<div style="position:absolute;inset:0;background:linear-gradient(160deg,'+ch.c+' 0%,#000 160%)"></div>'
+ +'<div style="position:absolute;top:14px;right:16px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:5px 10px;color:#fff;font-size:13px;font-weight:bold;letter-spacing:.05em">'+ch.n+' <span style="opacity:.7;font-weight:normal">'+ch.name+'</span></div>'
+ +'<div style="position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);text-align:center;color:rgba(255,255,255,.9)"><div style="font-size:46px;font-weight:bold;letter-spacing:.1em;text-shadow:0 2px 20px rgba(0,0,0,.6)">'+ch.cat+'</div></div>'
+ +'<div style="position:absolute;left:0;right:0;bottom:0;padding:14px 16px;background:linear-gradient(transparent,rgba(0,0,0,.78))">'
+   +'<div style="color:#ffd25a;font-size:11px;font-weight:bold;letter-spacing:.12em;margin-bottom:3px">NOW PLAYING</div>'
+   +'<div style="color:#fff;font-size:19px;font-weight:bold;text-shadow:0 1px 4px #000">'+now.t+'</div>'
+   +'<div style="height:4px;background:rgba(255,255,255,.2);border-radius:3px;margin-top:8px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#ffd25a"></div></div>'
+ +'</div>';
+}
+
+function guideView(){
+ var t=cols(),cur=channels[idx];
+ var head='<div style="display:flex;align-items:stretch;height:78px;border-bottom:2px solid #2f6bd0">'
+  +'<div style="flex:0 0 150px;background:'+cur.c+';position:relative;border-right:2px solid #0a275e">'
+    +'<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.85);font-weight:bold;font-size:15px;letter-spacing:.08em">'+cur.cat+'</div>'
+    +'<div style="position:absolute;top:5px;left:7px;color:#fff;font-size:11px;font-weight:bold;background:rgba(0,0,0,.35);padding:1px 5px;border-radius:4px">'+cur.n+'</div></div>'
+  +'<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 16px">'
+    +'<div style="color:#7fd0ff;font-size:13px;font-weight:bold;letter-spacing:.18em">TV GUIDE</div>'
+    +'<div style="color:#fff;font-size:24px;font-weight:bold;letter-spacing:.02em" id="clk">'+nowStr()+'</div></div>'
+  +'<div style="display:flex">'+t.map(function(d,i){return '<div style="width:118px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;color:#bcd6ff;font-size:12px;font-weight:bold;border-left:1px solid rgba(255,255,255,.12)">'+(i===0?'NOW · ':'')+fmt(d)+'</div>';}).join('')+'</div>'
+ +'</div>';
+
+ var rows=channels.map(function(ch,r){
+  var cells=ch.p.map(function(pr,c){
+    var on=(r===sel.r&&c===sel.c);
+    var bg=on?'#f0a51e':(c===0?'#1c4fa0':'#123a7a');
+    var col=on?'#3a2400':'#dce8ff';
+    return '<div data-r="'+r+'" data-c="'+c+'" class="gcell" style="width:118px;border-left:1px solid rgba(255,255,255,.1);background:'+bg+';color:'+col+';display:flex;align-items:center;padding:0 9px;font-size:12px;font-weight:'+(on?'bold':'normal')+';cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+pr.t+'</div>';
+  }).join('');
+  return '<div style="display:flex;height:34px;border-bottom:1px solid #0a2photos7;border-bottom:1px solid #0a2a5e">'
+   +'<div style="flex:0 0 150px;display:flex;align-items:center;gap:8px;padding:0 10px;background:'+(r%2?'#0c2c66':'#0f3478')+';border-right:2px solid #0a275e">'
+     +'<span style="color:#ffd25a;font-weight:bold;font-size:13px;min-width:30px">'+ch.n+'</span>'
+     +'<span style="color:#fff;font-size:12px;font-weight:bold;letter-spacing:.02em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+ch.name+'</span></div>'
+   +'<div style="display:flex;flex:1">'+cells+'</div></div>';
+ }).join('');
+
+ var s=channels[sel.r].p[sel.c];
+ var foot='<div style="position:absolute;left:0;right:0;bottom:0;height:42px;background:#06163d;border-top:2px solid #2f6bd0;display:flex;align-items:center;padding:0 14px;gap:10px">'
+  +'<span style="color:#ffd25a;font-weight:bold;font-size:12px">'+channels[sel.r].n+' '+channels[sel.r].name+'</span>'
+  +'<span style="color:#fff;font-size:12px;font-weight:bold">'+s.t+'</span>'
+  +'<span style="color:#9fc0ef;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+s.s+'</span></div>';
+
+ return '<div style="position:absolute;inset:0;background:linear-gradient(180deg,#0e3a8f,#061d52)">'+head+'<div style="position:absolute;left:0;right:0;top:78px;bottom:42px;overflow:hidden">'+rows+'</div>'+foot+'</div>';
+}
+
+function render(){
+ content.innerHTML = mode==="watch"?watchView():guideView();
+ if(mode==="guide"){[].forEach.call(content.querySelectorAll(".gcell"),function(el){
+   el.onclick=function(){sel.r=+el.dataset.r;sel.c=+el.dataset.c;render();};
+   el.ondblclick=function(){idx=+el.dataset.r;mode="watch";flash();render();};
+ });}
+ document.getElementById("btnGuide").classList.toggle("on",mode==="guide");
+}
+
+function flash(){chflash.textContent="CH "+channels[idx].n;chflash.style.opacity="1";setTimeout(function(){chflash.style.opacity="0";},1300);}
+
+function snow(){
+ if(!set.static||!set.crt){return;}
+ statc.style.opacity="1";var ctx=statc.getContext("2d"),W=160,H=120,t0=performance.now();
+ (function draw(t){var img=ctx.createImageData(W,H),d=img.data;for(var i=0;i<d.length;i+=4){var v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}ctx.putImageData(img,0,0);if(t-t0<320){requestAnimationFrame(draw);}else{statc.style.opacity="0";}})(t0);
+}
+
+function surf(dir){idx=(idx+dir+channels.length)%channels.length;mode="watch";snow();flash();render();}
+
+function nav(d){
+ if(mode==="watch"){if(d==="up")surf(-1);if(d==="down")surf(1);return;}
+ if(d==="up")sel.r=(sel.r-1+channels.length)%channels.length;
+ if(d==="down")sel.r=(sel.r+1)%channels.length;
+ if(d==="left")sel.c=(sel.c-1+3)%3;
+ if(d==="right")sel.c=(sel.c+1)%3;
+ render();
+}
+
+function apply(){
+ statc.getContext("2d");
+ screen.classList.toggle("crt-off",!set.crt);
+ screen.classList.toggle("flick",set.flick&&set.crt);
+ document.getElementById("ovlScan").style.opacity=set.crt?set.scan:0;
+ document.getElementById("ovlVig").style.opacity=set.crt?set.curve:0;
+ var f={none:"none",warm:"sepia(.35) saturate(1.2) contrast(1.05)",cool:"hue-rotate(-12deg) saturate(1.15)",bw:"grayscale(1) contrast(1.1)"}[set.tint];
+ content.style.filter=f;
+}
+
+document.getElementById("btnGuide").onclick=function(){mode=mode==="guide"?"watch":"guide";render();};
+document.getElementById("btnOk").onclick=function(){if(mode==="guide"){idx=sel.r;mode="watch";flash();render();}};
+document.getElementById("chUp").onclick=function(){surf(-1);};
+document.getElementById("chDn").onclick=function(){surf(1);};
+document.getElementById("btnSet").onclick=function(){settings.style.display=settings.style.display==="none"?"block":"none";};
+[].forEach.call(document.querySelectorAll("[data-d]"),function(b){b.onclick=function(){nav(b.dataset.d);};});
+[].forEach.call(document.querySelectorAll(".tog"),function(tg){tg.onclick=function(){var k=tg.dataset.t;set[k]=!set[k];tg.classList.toggle("on",set[k]);apply();};});
+document.getElementById("sScan").oninput=function(){set.scan=this.value/100;document.getElementById("vScan").textContent=this.value;apply();};
+document.getElementById("sCurve").oninput=function(){set.curve=this.value/100;document.getElementById("vCurve").textContent=this.value;apply();};
+document.getElementById("tint").onchange=function(){set.tint=this.value;apply();};
+
+setInterval(function(){var c=document.getElementById("clk");if(c)c.textContent=nowStr();},1000);
+apply();render();
+})();
+</script>
