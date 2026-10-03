@@ -1,0 +1,7 @@
+{
+  "_comment": "Rename to config.json (next to KamiTV.exe) to customise. All fields optional.",
+  "tunarrUrl": "http://localhost:8000",
+  "startFullscreen": false,
+  "tunarrExe": "",
+  "tunarrArgs": []
+}

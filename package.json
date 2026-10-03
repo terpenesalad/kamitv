@@ -1,0 +1,42 @@
+{
+  "name": "kamitv",
+  "version": "1.0.0",
+  "description": "KamiTV — a 2000s-Foxtel-styled, CRT-emulating live-TV front-end for Tunarr + Jellyfin.",
+  "author": "Ben Filer",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^31.7.6",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.kamitv.app",
+    "productName": "KamiTV",
+    "files": [
+      "main.js",
+      "app/**/*"
+    ],
+    "extraResources": [
+      { "from": "tools", "to": "tools" }
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "KamiTV"
+    },
+    "portable": {
+      "artifactName": "KamiTV-portable-${version}.exe"
+    }
+  }
+}
