@@ -40,9 +40,12 @@ jobs:
           path: |
             dist/*.exe
 
-      - name: Publish Release (on tag)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Publish Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: KamiTV v1.0.${{ github.run_number }}
           files: dist/*.exe
+          make_latest: true
           generate_release_notes: true
