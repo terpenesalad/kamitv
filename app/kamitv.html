@@ -438,7 +438,7 @@
         mpeg=mpegts.createPlayer({type:"mpegts",isLive:true,url:url});
         mpeg.attachMediaElement(vid); mpeg.load(); vid.play().catch(function(){});
       } else if(window.Hls && Hls.isSupported()){
-        hls=new Hls({startLevel:0,liveSyncDurationCount:1,liveMaxLatencyDurationCount:6,maxBufferLength:12,maxMaxBufferLength:45,backBufferLength:20,maxLiveSyncPlaybackRate:1.5,startFragPrefetch:true,testBandwidth:false});
+        hls=new Hls({startLevel:0,liveSyncDurationCount:2,liveMaxLatencyDurationCount:60,maxBufferLength:30,maxMaxBufferLength:60,backBufferLength:30,startFragPrefetch:true,testBandwidth:false});
         hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, applyLiveSubs); hls.on(Hls.Events.MANIFEST_PARSED, applyLiveSubs);
         hls.on(Hls.Events.ERROR, function(evt,data){
           if(!data||!data.fatal) return;
