@@ -60,14 +60,17 @@
   .ghead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6vh}
   .ghead .title{color:var(--gold);font-size:clamp(22px,3.6vw,40px);font-weight:600;letter-spacing:.03em}
   .ghead .clock{color:#aebccf;font-size:clamp(14px,2.1vw,22px);font-weight:500;font-variant-numeric:tabular-nums}
-  .gtimes{display:grid;grid-template-columns:var(--cw) 1fr 1fr 1fr;column-gap:16px;align-items:center;
+  .gtimes{display:grid;grid-template-columns:var(--cw) 1fr;column-gap:16px;align-items:center;
     padding:10px 18px 14px;color:#7e90a8;font-size:clamp(12px,1.6vw,16px);font-weight:500;
     border-bottom:1px solid rgba(255,255,255,.07)}
   .gtimes .today{display:flex;align-items:center;gap:8px;color:#aebccf}
   .gtimes .today .arr{color:var(--gold);font-size:.78em}
   .gtimes .t{font-variant-numeric:tabular-nums}
+  .gtl{position:relative;height:1.4em}
+  .gtl .tk{position:absolute;top:0;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:6px;border-left:1px solid rgba(255,255,255,.14)}
+  .gtl .nowtk{position:absolute;top:-2px;bottom:-16px;width:2px;margin-left:-1px;background:var(--gold);border-radius:2px;box-shadow:0 0 8px rgba(233,187,85,.6)}
   .grows{flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:8px 0;overflow:hidden}
-  .grow{min-height:clamp(42px,6.2vh,84px);display:grid;grid-template-columns:var(--cw) 1fr 1fr 1fr;column-gap:16px;
+  .grow{min-height:clamp(42px,6.2vh,84px);display:grid;grid-template-columns:var(--cw) 1fr;column-gap:16px;
     align-items:center;padding:0 18px;border-radius:18px;transition:background .12s}
   .grow.sel{background:rgba(233,187,85,.13)}
   .gch{display:flex;align-items:center;gap:16px;min-width:0}
@@ -78,6 +81,23 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
   .gcell.searching{color:#5d738f;font-style:italic;grid-column:2 / span 3}
   .gcell.on{background:var(--gold);color:#1b1405;font-weight:600;border-radius:999px;padding:9px 18px;justify-content:flex-start}
+  .gtrack{position:relative;height:clamp(36px,5.4vh,74px)}
+  .gprog{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0;
+    padding:0 12px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);
+    color:#9fb1c9;overflow:hidden;cursor:pointer;transition:background .12s}
+  .gprog:hover{background:rgba(255,255,255,.07)}
+  .gprog .pt{font-weight:500;font-size:clamp(13px,1.6vw,19px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gprog .ptm{font-size:clamp(10px,1.05vw,13px);color:#6f8199;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+  .gprog.pre{border-top-left-radius:3px;border-bottom-left-radius:3px}
+  .gprog.post{border-top-right-radius:3px;border-bottom-right-radius:3px}
+  .gprog.past{opacity:.45}
+  .grow.sel .gprog{color:#cfdaea}
+  .gprog.on{background:var(--gold);border-color:var(--gold);color:#1b1405}
+  .grow.sel .gprog.on{color:#1b1405}
+  .gprog.on .pt{font-weight:650}
+  .gprog.on .ptm{color:rgba(27,20,5,.72)}
+  .gnow{position:absolute;top:-5px;bottom:-5px;width:2px;margin-left:-1px;background:rgba(233,187,85,.75);border-radius:2px;pointer-events:none;z-index:2}
+  .gempty{position:absolute;inset:0;display:flex;align-items:center;padding:0 12px;color:#5d738f;font-style:italic;font-size:clamp(13px,1.6vw,19px)}
   .legend{display:flex;align-items:center;gap:26px;padding:14px 18px 4px;margin-top:6px;
     border-top:1px solid rgba(255,255,255,.07);font-weight:500;font-size:clamp(12px,1.5vw,15px);color:#8a9bb3}
   .legend .dot{display:inline-flex;align-items:center;gap:9px}
@@ -214,7 +234,7 @@
       <div id="odGrid" class="odgrid"></div>
     </div>
     <div class="gfoot">
-      <div>Press <span class="pill">SELECT</span> to watch &nbsp;·&nbsp; <span class="pill">↑ ↓</span> channel &nbsp;·&nbsp; <span class="pill">◄ ►</span> hours &nbsp;·&nbsp; <span class="pill">i</span> info &nbsp;·&nbsp; <span class="pill">GUIDE</span> to close</div>
+      <div>Press <span class="pill">SELECT</span> to watch &nbsp;·&nbsp; <span class="pill">↑ ↓</span> channel &nbsp;·&nbsp; <span class="pill">◄ ►</span> programmes &nbsp;·&nbsp; <span class="pill">i</span> info &nbsp;·&nbsp; <span class="pill">GUIDE</span> to close</div>
       <div class="brand"><b id="brandName">MYTV</b><br><span>mindless</span></div>
     </div>
   </div>
@@ -246,6 +266,8 @@
     <div class="srow tg"><label>Flicker</label><div class="tog" id="tFlick"></div></div>
     <div class="srow tg"><label>Hum bar</label><div class="tog" id="tHum"></div></div>
     <h3>Audio</h3>
+    <div class="srow tg"><label>Volume leveller</label><div class="tog" id="tLevel"></div></div>
+    <div class="shint" style="margin-top:-2px">Evens out loud and quiet channels automatically.</div>
     <div class="srow"><label>Volume boost</label><input type="range" id="sBoost" min="100" max="300" step="5"><span class="v" id="vBoost"></span></div>
     <h3>On Demand (Jellyfin)</h3>
     <div class="srow"><label>Server URL</label><input class="sinput" id="jfUrl" placeholder="http://localhost:8096"></div>
@@ -315,8 +337,8 @@
   var CONFIG={ url:(new URLSearchParams(location.search).get("url")) || localStorage.getItem("tunarr_url") || "http://localhost:8000",
                brand:(new URLSearchParams(location.search).get("brand")) || localStorage.getItem("tunarr_brand") || "KamiTV" };
   document.getElementById("brandName").textContent=CONFIG.brand;
-  var channels=[], idx=0, sel={r:0,c:0,t:0}, hls=null, mpeg=null, started=false, bannerTimer=null, hintTimer=null, volTimer=null, actx=null, srcNode=null, gainNode=null;
-  var DEFAULTS={brightness:100,contrast:100,saturation:100,hue:0,warmth:0,crt:true,scan:45,mask:30,bloom:35,aberr:22,aberrX:false,curve:55,flick:false,hum:true,boost:100};
+  var channels=[], idx=0, sel={r:0,at:0,w:0}, hls=null, mpeg=null, started=false, bannerTimer=null, hintTimer=null, volTimer=null, actx=null, srcNode=null, gainNode=null;
+  var DEFAULTS={brightness:100,contrast:100,saturation:100,hue:0,warmth:0,crt:true,scan:45,mask:30,bloom:35,aberr:22,aberrX:false,curve:55,flick:false,hum:true,boost:100,level:true};
   var settings=Object.assign({}, DEFAULTS, (function(){try{return JSON.parse(localStorage.getItem("tv_settings")||"{}");}catch(e){return {};}})());
   var JF={url:localStorage.getItem("jf_url")||"",key:localStorage.getItem("jf_key")||"",user:localStorage.getItem("jf_user")||""};
   var tab="guide", od={stack:[]}, mode="live", odTitle="", odItemId=null, subsOn=false;
@@ -431,7 +453,7 @@
     if(!channels.length) return;
     idx=(i+channels.length)%channels.length;
     var ch=channels[idx], url=ch.url;
-    stopPlayers();
+    stopPlayers(); agcReset();
     var isTs=/\.ts(\?|$)/i.test(url);
     try{
       if(isTs && window.mpegts && mpegts.isSupported()){
@@ -476,39 +498,58 @@
     if(diff<=0) return "Today"; if(diff===1) return "Tomorrow";
     return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
   }
+  var GWIN=5400000, GSLOT=1800000, GMAX=12*3600000;
+  function guideBase(){ return slotBase().getTime(); }
+  function gFocus(){ return Math.max(sel.at||0, Date.now()); }
+  function gEnsureVisible(){
+    var base=guideBase(), f=gFocus();
+    if(!sel.w || sel.w<base) sel.w=base;
+    while(f>=sel.w+GWIN && sel.w<base+GMAX) sel.w+=GSLOT;
+    while(f<sel.w && sel.w>base) sel.w-=GSLOT;
+  }
+  function selProg(ch){ return (ch&&ch.progs&&ch.progs.length)? progAt(ch,new Date(gFocus())) : null; }
   function renderGuide(){
     el("gClock").textContent=clockStr();
     document.documentElement.style.setProperty("--cw","clamp(160px,20vw,340px)");
-    var base=slotBase(), off=sel.t||0, nowD=new Date(), lookups, labels;
-    if(off===0){
-      lookups=[nowD, new Date(base.getTime()+1800000), new Date(base.getTime()+3600000)];
-      labels=["On now", ampm(lookups[1]), ampm(lookups[2])];
-    } else {
-      lookups=[0,1,2].map(function(n){return new Date(base.getTime()+(off+n)*1800000);});
-      labels=lookups.map(function(t){return ampm(t);});
-    }
-    el("gTimes").innerHTML='<div class="today"><span class="arr">\u25b2</span> '+dayLabel(lookups[0])+(off?' \u00b7 +'+(off/2)+'h':'')+'</div>'+
-      labels.map(function(l){return '<div class="t">'+l+'</div>';}).join("");
+    gEnsureVisible();
+    var w0=sel.w, w1=w0+GWIN, now=Date.now(), base=guideBase();
+    var nowPct=(now>=w0&&now<w1)?((now-w0)/GWIN*100):-1;
+    var ticks="";
+    for(var k=0;k<3;k++){ ticks+='<span class="tk" style="left:'+(k*100/3).toFixed(3)+'%">'+ampm(new Date(w0+k*GSLOT))+'</span>'; }
+    if(nowPct>=0) ticks+='<span class="nowtk" style="left:'+nowPct.toFixed(3)+'%"></span>';
+    var offH=Math.round((w0-base)/360000)/10;
+    el("gTimes").innerHTML='<div class="today"><span class="arr">\u25b2</span> '+dayLabel(new Date(w0))+(w0>base?' \u00b7 +'+offH+'h':'')+'</div><div class="gtl">'+ticks+'</div>';
 
     var len=channels.length;
     if(!len){ el("gRows").innerHTML=""; return; }
     var rowH=Math.min(84,Math.max(42,window.innerHeight*0.062))+7;
     var n=Math.max(5,Math.floor(window.innerHeight*0.74/rowH)); if(n%2===0) n--;
     var half=(n-1)/2, html="";
-    for(var k=0;k<n;k++){
-      var r=(((sel.r-half+k)%len)+len)%len;
-      var ch=channels[r], selected=(k===half), cells="";
-      if(ch.progs.length===0){
-        cells='<div class="gcell searching">searching for listings..</div>';
+    for(var k2=0;k2<n;k2++){
+      var r=(((sel.r-half+k2)%len)+len)%len;
+      var ch=channels[r], selected=(k2===half), track="";
+      if(!ch.progs.length){
+        track='<div class="gempty">searching for listings..</div>';
       } else {
-        for(var c=0;c<3;c++){
-          var p=progAt(ch,lookups[c]) || ((off===0&&c===0)?nextProg(ch,nowD):null);
-          cells+='<div class="gcell'+((selected&&c===sel.c)?' on':'')+'">'+(p?escHtml(p.title):"")+'</div>';
+        var sp=selected? selProg(ch) : null;
+        for(var j=0;j<ch.progs.length;j++){
+          var p=ch.progs[j]; if(!p.start||!p.stop) continue;
+          var s=p.start.getTime(), e=p.stop.getTime();
+          if(e<=w0||s>=w1) continue;
+          var a=Math.max(s,w0), b=Math.min(e,w1);
+          var L=(a-w0)/GWIN*100, W=(b-a)/GWIN*100;
+          var cls="gprog"+(p===sp?" on":"")+(s<w0?" pre":"")+(e>w1?" post":"")+(e<=now?" past":"");
+          var tm=ampm(p.start)+" \u2013 "+ampm(p.stop);
+          var at=Math.max(s,w0,now); if(at>=e) at=now;
+          track+='<div class="'+cls+'" data-at="'+at+'" style="left:'+L.toFixed(3)+'%;width:calc('+W.toFixed(3)+'% - 4px)" title="'+escHtml(p.title)+' \u00b7 '+tm+'">'+
+            '<span class="pt">'+escHtml(p.title)+'</span><span class="ptm">'+tm+'</span></div>';
         }
+        if(nowPct>=0) track+='<div class="gnow" style="left:'+nowPct.toFixed(3)+'%"></div>';
       }
       var logo=ch.logo?'<img class="clogo" src="'+ch.logo+'" alt="" onerror="this.style.display=\'none\'">':'';
       html+='<div class="grow'+(selected?' sel':'')+'" data-r="'+r+'">'+
-        '<div class="gch"><span class="cn">'+escHtml(ch.number)+'</span>'+logo+'<span class="cnm">'+escHtml(ch.name)+'</span></div>'+cells+'</div>';
+        '<div class="gch"><span class="cn">'+escHtml(ch.number)+'</span>'+logo+'<span class="cnm">'+escHtml(ch.name)+'</span></div>'+
+        '<div class="gtrack">'+track+'</div></div>';
     }
     el("gRows").innerHTML=html;
   }
@@ -519,7 +560,7 @@
     el("odView").style.display=g?"none":"";
     [].forEach.call(document.querySelectorAll(".gtab"),function(b){ b.classList.toggle("on",b.dataset.tab===tab); });
     el("vid").classList.toggle("pip", g);
-    if(g){ sel.r=idx; sel.c=0; sel.t=0; renderGuide(); } else { odRoot(); }
+    if(g){ sel.r=idx; sel.at=Date.now(); sel.w=0; renderGuide(); } else { odRoot(); }
   }
   function switchTab(t){ tab=t; showView(); }
   function toggleGuide(force){
@@ -591,7 +632,7 @@
       '<div class="odlabel">'+escHtml(label)+'</div></div>';
   }
   function playJellyfin(id,title,subIndex,startSec){
-    stopPlayers();
+    stopPlayers(); agcReset();
     var u=clean(JF.url)+"/Videos/"+id+"/master.m3u8?api_key="+encodeURIComponent(JF.key)+"&MediaSourceId="+id+"&VideoCodec=h264&AudioCodec=aac,mp3&TranscodingProtocol=hls&TranscodingContainer=ts&DeviceId=retrotv&PlaySessionId="+Date.now();
     if(subIndex!=null && subIndex>=0) u+="&SubtitleStreamIndex="+subIndex+"&SubtitleMethod=Encode";
     if(startSec && startSec>1) u+="&StartTimeTicks="+Math.floor(startSec*10000000);
@@ -769,10 +810,7 @@
   function guideInfo(){
     var ch=channels[sel.r]; if(!ch) return;
     cardCtx={type:"none",list:[],i:0};
-    var base=slotBase(), off=sel.t||0, when;
-    if(off===0 && sel.c===0) when=new Date();
-    else when=new Date(base.getTime()+(off+sel.c)*1800000);
-    var p=progAt(ch,when)||nextProg(ch,when)||progAt(ch,new Date());
+    var p=selProg(ch)||nextProg(ch,new Date(gFocus()))||progAt(ch,new Date());
     el("icKicker").textContent=ch.number+" \u00b7 "+ch.name;
     el("icTitle").textContent=p?p.title:ch.name;
     el("icSub").textContent=(p&&p.start&&p.stop)?(ampm(p.start)+" \u2013 "+ampm(p.stop)):"";
@@ -812,10 +850,25 @@
   /* ---------- input ---------- */
   function surf(d){ playChannel(idx+d); }
   function guideNav(d){
-    if(d==="up") sel.r=(sel.r-1+channels.length)%channels.length;
-    if(d==="down") sel.r=(sel.r+1)%channels.length;
-    if(d==="left"){ if(sel.c>0) sel.c--; else if(sel.t>0) sel.t--; }
-    if(d==="right"){ if(sel.c<2) sel.c++; else if(sel.t<24) sel.t++; }
+    var len=channels.length; if(!len) return;
+    if(d==="up") sel.r=(sel.r-1+len)%len;
+    if(d==="down") sel.r=(sel.r+1)%len;
+    if(d==="left"||d==="right"){
+      var ch=channels[sel.r], now=Date.now(), f=gFocus(), cur=selProg(ch), limit=guideBase()+GMAX+GWIN;
+      if(d==="right"){
+        var nx=null;
+        if(cur) nx=cur.stop.getTime(); else { var n2=nextProg(ch,new Date(f)); nx=n2?n2.start.getTime():null; }
+        if(nx==null || nx-f>3*3600000) nx=f+GSLOT;
+        if(nx<limit) sel.at=nx;
+      } else {
+        var ref=cur? cur.start.getTime() : f, pv=null;
+        for(var j=0;j<ch.progs.length;j++){ var q=ch.progs[j]; if(!q.start||!q.stop) continue;
+          var qe=q.stop.getTime(); if(qe<=ref && qe>now && (!pv || qe>pv.stop.getTime())) pv=q; }
+        if(pv) sel.at=Math.max(pv.start.getTime(), now);
+        else if(!cur || f-ref>3*3600000) sel.at=Math.max(f-GSLOT, now);
+        else if(sel.w>guideBase()) sel.w-=GSLOT;
+      }
+    }
     renderGuide();
     if(el("infoCard").classList.contains("show")) guideInfo();
   }
@@ -856,15 +909,50 @@
     if(el("crtRedOff")){ el("crtRedOff").setAttribute("dx",a.toFixed(2)); el("crtRedOff").setAttribute("dy",ay.toFixed(2)); }
     if(el("crtBluOff")){ el("crtBluOff").setAttribute("dx",(-a).toFixed(2)); el("crtBluOff").setAttribute("dy",(-ay).toFixed(2)); }
     if(gainNode) gainNode.gain.value = s.boost/100;
+    if(s.level && started){ if(initAudio()&&actx&&actx.state==="suspended") actx.resume(); }
+    if(actx && wiredLevel!==s.level) wireAudio();
   }
   function persist(){ try{ localStorage.setItem("tv_settings",JSON.stringify(settings)); }catch(e){} }
+  /* audio chain: src -> [leveller: agc -> compressor] -> boost gain -> speakers */
+  var agcNode=null, compNode=null, anNode=null, agcTimer=null, agcPow=0, agcBuf=null, wiredLevel=null;
+  var AGC_TARGET=0.1, AGC_MIN=0.25, AGC_MAX=4;
   function initAudio(){
     if(actx) return true;
     try{ var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false;
-      actx=new AC(); srcNode=actx.createMediaElementSource(vid); gainNode=actx.createGain();
-      srcNode.connect(gainNode); gainNode.connect(actx.destination); gainNode.gain.value=settings.boost/100; return true;
+      actx=new AC(); srcNode=actx.createMediaElementSource(vid);
+      gainNode=actx.createGain(); agcNode=actx.createGain(); compNode=actx.createDynamicsCompressor();
+      anNode=actx.createAnalyser(); anNode.fftSize=2048;
+      compNode.threshold.value=-14; compNode.knee.value=10; compNode.ratio.value=6; compNode.attack.value=0.005; compNode.release.value=0.25;
+      gainNode.gain.value=settings.boost/100;
+      wireAudio(); return true;
     }catch(e){ actx=null; return false; }
   }
+  function wireAudio(){
+    if(!actx) return;
+    [srcNode,agcNode,compNode,gainNode].forEach(function(n){ try{ n.disconnect(); }catch(e){} });
+    srcNode.connect(anNode);
+    if(settings.level){ srcNode.connect(agcNode); agcNode.connect(compNode); compNode.connect(gainNode); startAgc(); }
+    else { stopAgc(); agcNode.gain.value=1; srcNode.connect(gainNode); }
+    gainNode.connect(actx.destination);
+    wiredLevel=settings.level;
+  }
+  function startAgc(){
+    if(agcTimer) return;
+    agcBuf=new Float32Array(anNode.fftSize);
+    agcTimer=setInterval(function(){
+      if(!actx||vid.paused) return;
+      anNode.getFloatTimeDomainData(agcBuf);
+      var sum=0; for(var i=0;i<agcBuf.length;i++) sum+=agcBuf[i]*agcBuf[i];
+      var pw=sum/agcBuf.length;
+      if(pw<1e-5) return;                                   /* near-silence: hold the current level */
+      agcPow = agcPow ? agcPow*0.96 + pw*0.04 : pw;         /* ~3s loudness average */
+      var g=Math.min(AGC_MAX,Math.max(AGC_MIN,AGC_TARGET/Math.sqrt(agcPow)));
+      var cur=agcNode.gain.value;
+      agcNode.gain.setTargetAtTime(g, actx.currentTime, g<cur?0.4:2.0);  /* duck fast, raise slowly */
+    },120);
+  }
+  function stopAgc(){ if(agcTimer){ clearInterval(agcTimer); agcTimer=null; } }
+  function agcReset(){ agcPow=0; }
   function setLabels(){
     el("vBri").textContent=settings.brightness+"%"; el("vCon").textContent=settings.contrast+"%";
     el("vSat").textContent=settings.saturation+"%"; el("vHue").textContent=settings.hue+"\u00b0";
@@ -878,6 +966,7 @@
     setLabels(); el("tCrt").classList.toggle("on",settings.crt);
     el("tFlick").classList.toggle("on",settings.flick); el("tHum").classList.toggle("on",settings.hum);
     el("tAberrX").classList.toggle("on",settings.aberrX);
+    el("tLevel").classList.toggle("on",settings.level);
   }
   function toggleSettings(force){
     var p=el("setp"), show=(force!==undefined)?force:!p.classList.contains("show");
@@ -891,7 +980,7 @@
       if(v>100){ if(initAudio()&&actx&&actx.state==="suspended") actx.resume(); }
       if(gainNode) gainNode.gain.value=v/100; persist(); });
     function tog(id,key){ el(id).addEventListener("click",function(){ settings[key]=!settings[key]; this.classList.toggle("on",settings[key]); applySettings(); persist(); }); }
-    tog("tCrt","crt"); tog("tFlick","flick"); tog("tHum","hum"); tog("tAberrX","aberrX");
+    tog("tCrt","crt"); tog("tFlick","flick"); tog("tHum","hum"); tog("tAberrX","aberrX"); tog("tLevel","level");
     var PRE={subtle:{scan:30,mask:18,bloom:20,aberr:12,curve:40,flick:false,hum:true},
              full:{scan:60,mask:45,bloom:55,aberr:38,curve:72,flick:true,hum:true},
              trinitron:{scan:24,mask:66,bloom:42,aberr:18,curve:50,flick:false,hum:true}};
@@ -966,7 +1055,10 @@
   el("guide").addEventListener("click",function(e){
     if(tab!=="guide") return;
     var row=e.target.closest(".grow"); if(!row||row.dataset.r===undefined) return;
-    sel.r=parseInt(row.dataset.r,10); sel.c=0; renderGuide();
+    sel.r=parseInt(row.dataset.r,10);
+    var pr=e.target.closest(".gprog"); if(pr&&pr.dataset.at) sel.at=parseInt(pr.dataset.at,10);
+    renderGuide();
+    if(el("infoCard").classList.contains("show")) guideInfo();
   });
   el("guide").addEventListener("dblclick",function(){ if(tab==="guide"){ playChannel(sel.r); toggleGuide(false);} });
 
@@ -999,6 +1091,7 @@
   /* power on */
   el("power").addEventListener("click",async function(){
     el("power").style.display="none"; started=true;
+    if(settings.level){ if(initAudio()&&actx&&actx.state==="suspended") actx.resume(); }
     if(await load()){ playChannel(0); }
     flashHint();
   });
