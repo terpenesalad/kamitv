@@ -20,6 +20,7 @@ chromatic aberration incl. an "extreme" broken-CRT mode, vignette, flicker, hum 
 main.js                       Electron main: window, webSecurity off (no CORS), autoplay, optional config.json
 package.json                  electron + electron-builder config (NSIS installer + portable, icon build/icon.ico)
 app/kamitv.html               the entire front-end in one file (HTML/CSS/JS, fonts embedded)
+app/vendor/                   hls.min.js + mpegts.js bundled locally so playback works with no internet
 build/icon.ico, icon.png      app icon
 tools/KamiTV Stream Relay.bat FFmpeg relay for streams the browser can't play
 config.example.json           copy to config.json next to the exe: tunarrUrl, startFullscreen, tunarrExe (auto-launch)
@@ -45,7 +46,7 @@ legacy/                       old Chrome --disable-web-security .bat launchers (
   `{start, stop, title, desc}`. Tunarr URL: Settings, `?url=`, or config.json.
 - **Playback:** hls.js 1.5.13 (live config: `liveSyncDurationCount:2, liveMaxLatencyDurationCount:60`,
   no `maxLiveSyncPlaybackRate`; a tighter sync with 1.5x catch-up made it skip forward after tune-in),
-  mpegts.js for `.ts`, native fallback. Both libs load from jsdelivr.
+  mpegts.js for `.ts`, native fallback. Both libs are bundled in `app/vendor/` (no CDN), so the app works fully offline against a local Tunarr/Jellyfin.
   Stream errors are classified (codec vs network/CORS) and shown as a toast.
 - **Guide:** timeline EPG. 90-minute window (`GWIN`), 30-minute steps, up to 12h ahead (`GMAX`).
   State `sel = {r: row, at: focus time ms, w: window start ms}`. Blocks sized by real start/stop,
